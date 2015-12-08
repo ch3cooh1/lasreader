@@ -1,0 +1,45 @@
+lasreader <- function(lasdir){
+  ##Calculate number of lines down to line beginning with "~A"
+  rawlas <- readChar(lasdir, file.info(lasdir)$size)
+  lasheader <- substr(rawlas, 1, regexpr("~A", rawlas)[1])
+  n <- (nchar(lasheader)-nchar(gsub("\r\n", " ", lasheader)))+1
+  
+  ##Read data from .las file without column names
+  lastable <- read.table(lasdir, skip = n, header = TRUE, na.strings = "-999.25")
+  
+  ##Read in header including line beginning with "~A"
+  columns <- readLines(lasdir, n = (n))
+ 
+  ##Isolate last line read in aka the line beginning with "~A"
+  columns <- columns[length(columns)]
+  
+  ##Split up character vector into a list
+  columns <- as.vector(unlist(strsplit(columns, " ")), mode = "list")
+  
+  ##Previous line introduces many empty values
+  ##Convert those values to NA
+  for (i in 1:length(columns)) {
+    if(columns[[i]] == ""){
+      columns[[i]] <- NA
+    }
+  }
+  
+  ##Eliminate NA to be left with a list of column names plus a first value of "~A"
+  columns <- columns[!is.na(columns)]
+  
+  ##Eliminate "~A value
+  columns <- columns[2:length(columns)]
+  
+  ##Some las files have gamma ray stored as GRR instead of GR
+  ##Determine if that is the case here and if so replace "GRR" with "GR"
+  if("GRR" %in% columns){
+    grrnum <- which(columns == "GRR")
+    columns[grrnum] <- "GR"
+  }
+  
+  ##Assign extracted column names to data from las file
+  names(lastable) <- columns
+  
+  ##Store las data to global environment
+  lasdata <<- lastable
+}
