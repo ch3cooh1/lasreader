@@ -17,7 +17,7 @@ lasreader <- function(lasdir, slb = FALSE){
   lastable <- read.table(lasdir, skip = n, header = TRUE, na.strings = "-999.25")
   
   ##Read in header including line beginning with "~A"
-  columns <- readLines(lasdir, n = (n))
+  columns <- readLines(lasdir, n = (n+offset))
  
   ##Isolate last line read in aka the line beginning with "~A"
   columns <- columns[length(columns)]
