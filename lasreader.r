@@ -1,4 +1,13 @@
-lasreader <- function(lasdir){
+lasreader <- function(lasdir, slb = FALSE){
+  ##Schlumberger .las files have a different format that places the column names above
+  ##the line beginning with "~A" and the data below.  If file is from Schlumberger then
+  ##set slb = TRUE to offset reader correctly.
+  if(slb == TRUE){
+    offset <- -2
+  } else {
+    offset <- 0
+  }
+  
   ##Calculate number of lines down to line beginning with "~A"
   rawlas <- readChar(lasdir, file.info(lasdir)$size)
   lasheader <- substr(rawlas, 1, regexpr("~A", rawlas)[1])
